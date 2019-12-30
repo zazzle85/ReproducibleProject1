@@ -10,8 +10,29 @@ output:
 1. Load the data (i.e. read.csv())
 2. Process/transform the data (if necessary) into a format suitable for your analysis:
 
-```{r , echo=TRUE}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 data<-read.csv("activity.csv")
 data$date<-as.Date(data$date)
 ```
@@ -22,15 +43,25 @@ data$date<-as.Date(data$date)
 2. Make a histogram of the total number of steps taken each day
 3. Calculate and report the mean and median of the total number of steps taken per day:
 
-```{r , echo=TRUE}
+
+```r
 TotalSteps<- aggregate(data$steps,by=list(data$date), FUN=sum)
 colnames(TotalSteps)<-c("Date","Steps")
 
 hist(TotalSteps$Steps, 
      main="Daily Total Steps",
      xlab="Total Steps in a Day")
+```
 
+![](PA1_Template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 summary(TotalSteps$Steps)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##      41    8841   10765   10766   13294   21194       8
 ```
 
 ## What is the average daily activity pattern?
@@ -38,13 +69,23 @@ summary(TotalSteps$Steps)
 1. Make a time series plot (i.e.type="l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? 835
 
-```{r , echo=TRUE}
+
+```r
 avgInt<-aggregate(data$steps, by=list(data$interval),FUN=mean,na.rm=TRUE)
 colnames(avgInt)<-c("Interval","AvgSteps")
 plot(avgInt$Interval,avgInt$AvgSteps,type="l")
+```
 
+![](PA1_Template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 MaxSteps<- avgInt[which.max(avgInt$AvgSteps),]
 MaxSteps
+```
+
+```
+##     Interval AvgSteps
+## 104      835 206.1698
 ```
 
 ## Imputing missing values
@@ -56,10 +97,17 @@ MaxSteps
 
 Now there are no NAs so the NAs are now being counted in the histogram thus increasing frequency. The median has increased by 1 but mean is unaffected. 
 
-```{r , echo=TRUE}
+
+```r
 TotalNA<-sum(is.na(data))
 TotalNA
+```
 
+```
+## [1] 2304
+```
+
+```r
 Joined<-left_join(data,avgInt,by=(c("interval"="Interval")))
 Joined$FilledSteps<-coalesce(as.numeric(Joined$steps),Joined$AvgSteps)
 
@@ -67,14 +115,25 @@ JoinedTotal<-aggregate(Joined$FilledSteps,by=list(Joined$date), FUN=sum)
 colnames(JoinedTotal)<-c("Date","TotalSteps")
 
 hist(JoinedTotal$TotalSteps)
+```
+
+![](PA1_Template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+```r
 summary(JoinedTotal$TotalSteps)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10766   10766   12811   21194
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 2. Make a panel plot containing a time series plot (i.e. type="l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
-```{r , echo=TRUE}
+
+```r
 Joined$Week<-weekdays(Joined$date)
 Joined$Weekday<-as.factor(ifelse(Joined$Week=="Saturday","weekend",ifelse(Joined$Week=="Sunday","weekend","weekday")))
 
@@ -91,5 +150,7 @@ par(mfrow=c(1,2))
 plot(weekendAvg$WeekendInterval,weekendAvg$AvgSteps,type="l", main="Weekend Avg", ylim = c(0,300))
 plot(weekdayAvg$WeekdayInterval,weekdayAvg$AvgSteps,type="l", main= "Weekday Avg", ylim = c(0,300))
 ```
+
+![](PA1_Template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 
